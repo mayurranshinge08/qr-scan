@@ -2,6 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import QRCode from 'qrcode'
+import { Document, Page as PdfPage, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -50,7 +55,8 @@ function DocumentList({ onBack, onSelect }: { onBack: () => void; onSelect: (id:
 }
 
 function FakePage({ zoom, doc }: { zoom: number; doc: typeof documents[number] }) {
-  return <div className="pdf-page image-pdf-page" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center', marginBottom: `${(zoom - 100) * 5}px` }}><iframe src={`${doc.url}#page=1&view=FitH`} title={`${doc.title} PDF document`} /></div>
+  const [pageCount, setPageCount] = useState(0)
+  return <div className="pdf-page image-pdf-page" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center', marginBottom: `${(zoom - 100) * 5}px` }}><Document file={doc.url} onLoadSuccess={({ numPages }) => setPageCount(numPages)} loading={<div className="pdf-loading">Loading document…</div>} error={<div className="pdf-error"><FileText size={30} /><strong>PDF preview unavailable</strong><a href={doc.url} target="_blank" rel="noreferrer">Open PDF in a new tab</a></div>}><PdfPage pageNumber={1} width={760} renderAnnotationLayer renderTextLayer /></Document>{pageCount > 0 && <span className="sr-only">Loaded {pageCount} pages</span>}</div>
 }
 
 function QrPattern({ value, size = 220 }: { value: string; size?: number }) {
