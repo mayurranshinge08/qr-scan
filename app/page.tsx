@@ -1,47 +1,80 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  Check,
+  ChevronRight,
+  Copy,
+  Download,
+  FileText,
+  Home,
+  Maximize2,
+  Menu,
+  QrCode,
+  RefreshCw,
+  Search,
+  Share2,
+  Sparkles,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react'
+
+const documents = [
+  { id: 'flutter', title: 'Flutter Complete Guide', description: 'Complete Flutter Development Guide', size: '2.5 MB', pages: 184, color: 'coral', url: 'https://storage.example.com/pdfs/flutter-complete-guide.pdf' },
+  { id: 'dart', title: 'Dart Programming Guide', description: 'A practical guide to modern Dart', size: '1.8 MB', pages: 132, color: 'blue', url: 'https://storage.example.com/pdfs/dart-programming-guide.pdf' },
+  { id: 'firebase', title: 'Firebase Integration Guide', description: 'Build connected apps with Firebase', size: '3.1 MB', pages: 96, color: 'gold', url: 'https://storage.example.com/pdfs/firebase-integration-guide.pdf' },
+  { id: 'bloc', title: 'Flutter BLoC Guide', description: 'Predictable state management patterns', size: '1.4 MB', pages: 78, color: 'green', url: 'https://storage.example.com/pdfs/flutter-bloc-guide.pdf' },
+  { id: 'clean', title: 'Clean Architecture Guide', description: 'Scalable software architecture principles', size: '2.2 MB', pages: 118, color: 'violet', url: 'https://storage.example.com/pdfs/clean-architecture-guide.pdf' },
+]
+
+const chapters = ['Introduction to Flutter', 'Setting up your environment', 'Widgets and layouts', 'State management', 'Navigation and routing', 'Working with APIs']
+
+function Logo({ small = false }: { small?: boolean }) {
+  return <div className={`logo-mark ${small ? 'logo-small' : ''}`}><FileText size={small ? 18 : 25} strokeWidth={2.4} /><span>QR</span></div>
+}
+
+function Header({ onHome }: { onHome: () => void }) {
+  return <header className="site-header"><button className="brand-button" onClick={onHome}><Logo small /><span>PDF QR Viewer</span></button><nav><button className="nav-link active">Library</button><button className="nav-link">About</button><button className="icon-button menu-button" aria-label="Open menu"><Menu size={20} /></button></nav></header>
+}
+
+function HomeScreen({ onBrowse }: { onBrowse: () => void }) {
+  return <main className="home-screen"><div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" /><section className="hero-content"><div className="eyebrow"><Sparkles size={15} /> A calmer way to read</div><Logo /><h1>Every document,<br /><em>within reach.</em></h1><p>Keep your essential PDFs close, readable, and easy to share. Scan once and pick up exactly where you left off.</p><button className="primary-button hero-button" onClick={onBrowse}>View PDF Documents <ArrowRight size={18} /></button><div className="hero-note"><span className="avatar-stack"><i /><i /><i /></span> Trusted by curious readers everywhere</div></section><aside className="hero-card"><div className="card-label">Featured document <span>01 / 05</span></div><div className="paper-preview"><div className="paper-top"><span className="tiny-dot" /><span>FLUTTER / 2024</span></div><div className="paper-lines"><b>Flutter<br />Complete<br /><i>Guide</i></b><span>Build beautiful, performant apps<br />for every screen.</span></div><div className="paper-footer"><span>PDF QR VIEWER</span><span>p. 01</span></div></div><div className="hero-card-caption"><div><strong>Flutter Complete Guide</strong><span>Complete Flutter Development Guide</span></div><ChevronRight size={19} /></div></aside></main>
+}
+
+function DocumentList({ onBack, onSelect }: { onBack: () => void; onSelect: (id: string) => void }) {
+  const [query, setQuery] = useState('')
+  const [refreshed, setRefreshed] = useState(false)
+  const filtered = useMemo(() => documents.filter((doc) => `${doc.title} ${doc.description}`.toLowerCase().includes(query.toLowerCase())), [query])
+  return <main className="library-page"><div className="page-heading"><button className="back-link" onClick={onBack}><ArrowLeft size={17} /> Back</button><div className="heading-row"><div><div className="eyebrow">Your reading shelf</div><h1>PDF Documents</h1><p>{documents.length} carefully collected guides</p></div><button className={`refresh-button ${refreshed ? 'spinning' : ''}`} onClick={() => { setRefreshed(true); setTimeout(() => setRefreshed(false), 700) }} aria-label="Refresh documents"><RefreshCw size={18} /></button></div></div><div className="search-wrap"><Search size={19} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search PDF documents..." /><kbd>⌘ K</kbd></div><div className="document-list">{filtered.map((doc, index) => <button className="document-card" key={doc.id} onClick={() => onSelect(doc.id)} style={{ animationDelay: `${index * 70}ms` }}><span className={`doc-icon ${doc.color}`}><FileText size={23} /></span><span className="doc-info"><strong>{doc.title}</strong><span>{doc.description}</span><small>{doc.size} <i /> {doc.pages} pages</small></span><span className="card-arrow"><ChevronRight size={19} /></span></button>)}{!filtered.length && <div className="empty-state"><Search size={28} /><strong>No documents found</strong><span>Try another search term.</span></div>}</div><p className="library-footer"><span className="status-dot" /> All documents available offline</p></main>
+}
+
+function FakePage({ zoom }: { zoom: number }) {
+  return <div className="pdf-page" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center', marginBottom: `${(zoom - 100) * 5}px` }}><div className="pdf-page-inner"><div className="pdf-kicker">CHAPTER ONE</div><h2>Introduction<br /><i>to Flutter</i></h2><div className="pdf-rule" /><p className="lead-copy">Flutter is Google&apos;s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.</p><div className="pdf-columns"><div><p>With Flutter, you can create expressive and flexible designs that feel at home on every platform. This guide walks through the foundations, from your first widget to production-ready architecture.</p><p>The framework is built around a simple idea: everything is a widget. Compose small, focused pieces into interfaces that are fast, delightful, and maintainable.</p></div><div className="pull-quote">“Build interfaces that feel as good as they look.”<small>— The Flutter team</small></div></div><div className="pdf-diagram"><span><BookOpen size={21} /> widgets</span><ArrowRight size={18} /><span><Sparkles size={21} /> experience</span></div><div className="page-number">01 <span>PDF QR VIEWER</span></div></div></div>
+}
+
+function QrPattern() { return <div className="qr-pattern" aria-label="QR code"><div className="finder f1" /><div className="finder f2" /><div className="finder f3" /><div className="qr-noise" /></div> }
+
+function QrModal({ doc, onClose, onFullscreen }: { doc: typeof documents[number]; onClose: () => void; onFullscreen: () => void }) {
+  const [copied, setCopied] = useState(false)
+  return <div className="modal-backdrop" onClick={onClose}><section className="qr-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={onClose} aria-label="Close QR dialog"><X size={18} /></button><div className="eyebrow">Instant access</div><h2>Download this PDF</h2><p>Scan the QR code using another phone to download it.</p><button className="qr-tap" onClick={onFullscreen}><QrPattern /><span><Maximize2 size={14} /> Tap to expand</span></button><strong className="qr-title">{doc.title}</strong><div className="modal-actions"><button className="primary-button"><Download size={16} /> Download PDF</button><button className="secondary-button"><Share2 size={16} /> Share</button></div><button className="save-qr" onClick={() => { setCopied(true); setTimeout(() => setCopied(false), 1800) }}>{copied ? <Check size={16} /> : <Copy size={16} />} {copied ? 'QR link copied' : 'Save QR Code'}</button></section></div>
+}
+
+function FullscreenQr({ doc, onClose }: { doc: typeof documents[number]; onClose: () => void }) { return <div className="fullscreen-qr"><button className="back-link" onClick={onClose}><ArrowLeft size={17} /> QR Code</button><div className="fullscreen-content"><div className="eyebrow">Scan to download</div><h1>{doc.title}</h1><div className="large-qr"><QrPattern /></div><p>Point your camera at the code to open this document.</p><span className="url-chip">{doc.url}</span></div></div> }
+
+function Viewer({ doc, onList, onQr }: { doc: typeof documents[number]; onList: () => void; onQr: () => void }) {
+  const [zoom, setZoom] = useState(100)
+  return <main className="viewer-page"><div className="viewer-top"><button className="back-link" onClick={onList}><ArrowLeft size={17} /> Documents</button><div className="viewer-title"><span className={`mini-doc-icon ${doc.color}`}><FileText size={16} /></span><strong>{doc.title}</strong><span className="view-page-count">1 / {doc.pages}</span></div><div className="viewer-tools"><button className="icon-button" onClick={() => setZoom(Math.max(80, zoom - 10))} aria-label="Zoom out"><ZoomOut size={18} /></button><span>{zoom}%</span><button className="icon-button" onClick={() => setZoom(Math.min(130, zoom + 10))} aria-label="Zoom in"><ZoomIn size={18} /></button></div></div><div className="viewer-body"><aside className="chapter-list"><span className="chapter-label">Contents</span>{chapters.map((chapter, i) => <button key={chapter} className={i === 0 ? 'selected' : ''}><span>{String(i + 1).padStart(2, '0')}</span>{chapter}</button>)}<div className="viewer-tip"><Sparkles size={15} /><span>Reading tip</span><p>Use the QR code to continue reading on another device.</p></div></aside><section className="paper-stage"><FakePage zoom={zoom} /></section></div><div className="viewer-actionbar"><button onClick={onList}><ArrowLeft size={17} /> Back</button><button onClick={onList}><Home size={17} /> Home</button><button className="qr-action" onClick={onQr}><QrCode size={17} /> QR Code</button></div></main>
+}
+
 export default function Page() {
-  return (
-    <main
-      style={{
-        colorScheme: 'light dark',
-        position: 'relative',
-        display: 'flex',
-        minHeight: '100vh',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'light-dark(#fff, #000)',
-        color: 'light-dark(#000, #fff)',
-      }}
-    >
-      <svg
-        aria-hidden="true"
-        style={{ width: 80, height: 80 }}
-        width={80}
-        height={80}
-        fill="none"
-        viewBox="0 0 20 20"
-        xmlns="http://www.w3.org/2000/svg"
-        stroke="currentColor"
-        strokeWidth="0.5"
-      >
-        <path
-          d="M14.2 14.2H17V6.9375C17 4.76288 15.2371 3 13.0625 3H5.8V5.8M14.2 14.2V7.79063L7.79062 14.2H14.2ZM14.2 14.2V17H6.9375C4.76288 17 3 15.2371 3 13.0625V5.8H5.8M5.8 5.8V12.2313L12.2313 5.8H5.8Z"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <p
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: 'calc(50% + 56px)',
-          transform: 'translateX(-50%)',
-          whiteSpace: 'nowrap',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: 'light-dark(#71717a, #a1a1aa)',
-        }}
-      >
-        Your v0 generation will show here.
-      </p>
-    </main>
-  )
+  const [screen, setScreen] = useState<'home' | 'list' | 'viewer'>('home')
+  const [selectedId, setSelectedId] = useState('flutter')
+  const [qrOpen, setQrOpen] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
+  const selected = documents.find((doc) => doc.id === selectedId) ?? documents[0]
+  return <div className="app-shell"><Header onHome={() => setScreen('home')} />{screen === 'home' && <HomeScreen onBrowse={() => setScreen('list')} />}{screen === 'list' && <DocumentList onBack={() => setScreen('home')} onSelect={(id) => { setSelectedId(id); setScreen('viewer') }} />}{screen === 'viewer' && <Viewer doc={selected} onList={() => setScreen('list')} onQr={() => setQrOpen(true)} />}{qrOpen && !fullscreen && <QrModal doc={selected} onClose={() => setQrOpen(false)} onFullscreen={() => setFullscreen(true)} />}{fullscreen && <FullscreenQr doc={selected} onClose={() => setFullscreen(false)} />}</div>
 }
