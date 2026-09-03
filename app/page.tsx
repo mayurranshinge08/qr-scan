@@ -29,9 +29,9 @@ import {
 } from 'lucide-react'
 
 const documents = [
-  { id: 'flutter-interview', title: 'Top 50 Flutter Interview Questions & Answers', description: 'A practical Flutter interview preparation guide', size: '1.2 MB', pages: 12, color: 'coral', url: '/documents/flutter-interview-questions.pdf' },
-  { id: 'dart-patterns', title: 'Dart Star Patterns', description: 'Dart star pattern programs with examples', size: '420 KB', pages: 5, color: 'blue', url: '/documents/dart-star-patterns.pdf' },
-  { id: 'internship-assignment', title: 'Internship Assignment — Flutter Developer', description: 'Flutter recreation assignment and deliverables', size: '680 KB', pages: 3, color: 'gold', url: '/documents/internship-assignment.pdf' },
+  { id: 'flutter-interview', title: 'Top 50 Flutter Interview Questions & Answers', description: 'A practical Flutter interview preparation guide', size: '1.2 MB', pages: 12, color: 'coral', url: '/api/documents/flutter-interview' },
+  { id: 'dart-patterns', title: 'Dart Star Patterns', description: 'Dart star pattern programs with examples', size: '420 KB', pages: 5, color: 'blue', url: '/api/documents/dart-patterns' },
+  { id: 'internship-assignment', title: 'Internship Assignment — Flutter Developer', description: 'Flutter recreation assignment and deliverables', size: '680 KB', pages: 3, color: 'gold', url: '/api/documents/internship-assignment' },
 ]
 
 function Logo({ small = false }: { small?: boolean }) {
@@ -57,7 +57,7 @@ function FakePage({ zoom, doc, pageNumber, onLoad }: { zoom: number; doc: typeof
   return <div className="pdf-page image-pdf-page" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center', marginBottom: `${(zoom - 100) * 5}px` }}><PdfDocumentPreview url={doc.url} title={doc.title} pageNumber={pageNumber} onLoad={onLoad} /></div>
 }
 
-function getDocumentUrl(path: string) { return typeof window === 'undefined' ? path : new URL(path, window.location.origin).href }
+function getDocumentUrl(path: string, download = false) { return typeof window === 'undefined' ? path : new URL(`${path}${download ? '?download=1' : ''}`, window.location.origin).href }
 
 function QrPattern({ value, size = 220 }: { value: string; size?: number }) {
   const [src, setSrc] = useState('')
@@ -67,12 +67,12 @@ function QrPattern({ value, size = 220 }: { value: string; size?: number }) {
 
 function QrModal({ doc, onClose, onFullscreen }: { doc: typeof documents[number]; onClose: () => void; onFullscreen: () => void }) {
   const [copied, setCopied] = useState(false)
-  const downloadPdf = () => { const link = document.createElement('a'); link.href = getDocumentUrl(doc.url); link.download = `${doc.id}.pdf`; link.setAttribute('aria-label', `Download ${doc.title}`); document.body.appendChild(link); link.click(); link.remove() }
+  const downloadPdf = () => { const link = document.createElement('a'); link.href = getDocumentUrl(doc.url, true); link.download = `${doc.id}.pdf`; link.setAttribute('aria-label', `Download ${doc.title}`); document.body.appendChild(link); link.click(); link.remove() }
   const sharePdf = async () => { if (navigator.share) await navigator.share({ title: doc.title, text: `Download ${doc.title}`, url: getDocumentUrl(doc.url) }); else { await navigator.clipboard.writeText(getDocumentUrl(doc.url)); setCopied(true); setTimeout(() => setCopied(false), 1800) } }
-  return <div className="modal-backdrop" onClick={onClose}><section className="qr-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={onClose} aria-label="Close QR dialog"><X size={18} /></button><div className="eyebrow">Instant access</div><h2>Download this PDF</h2><p>Scan this high-contrast QR code using another phone to open the document.</p><button className="qr-tap" onClick={onFullscreen}><QrPattern value={getDocumentUrl(doc.url)} size={220} /><span><Maximize2 size={14} /> Tap to expand</span></button><strong className="qr-title">{doc.title}</strong><div className="modal-actions"><button className="primary-button" onClick={downloadPdf}><Download size={16} /> Download PDF</button><button className="secondary-button" onClick={sharePdf}><Share2 size={16} /> Share</button></div><button className="save-qr" onClick={() => { navigator.clipboard.writeText(getDocumentUrl(doc.url)); setCopied(true); setTimeout(() => setCopied(false), 1800) }}>{copied ? <Check size={16} /> : <Copy size={16} />} {copied ? 'QR link copied' : 'Copy download link'}</button></section></div>
+  return <div className="modal-backdrop" onClick={onClose}><section className="qr-modal" onClick={(e) => e.stopPropagation()}><button className="modal-close" onClick={onClose} aria-label="Close QR dialog"><X size={18} /></button><div className="eyebrow">Instant access</div><h2>Download this PDF</h2><p>Scan this high-contrast QR code using another phone to open the document.</p><button className="qr-tap" onClick={onFullscreen}><QrPattern value={getDocumentUrl(doc.url, true)} size={220} /><span><Maximize2 size={14} /> Tap to expand</span></button><strong className="qr-title">{doc.title}</strong><div className="modal-actions"><button className="primary-button" onClick={downloadPdf}><Download size={16} /> Download PDF</button><button className="secondary-button" onClick={sharePdf}><Share2 size={16} /> Share</button></div><button className="save-qr" onClick={() => { navigator.clipboard.writeText(getDocumentUrl(doc.url)); setCopied(true); setTimeout(() => setCopied(false), 1800) }}>{copied ? <Check size={16} /> : <Copy size={16} />} {copied ? 'QR link copied' : 'Copy download link'}</button></section></div>
 }
 
-function FullscreenQr({ doc, onClose }: { doc: typeof documents[number]; onClose: () => void }) { return <div className="fullscreen-qr"><button className="back-link" onClick={onClose}><ArrowLeft size={17} /> QR Code</button><div className="fullscreen-content"><div className="eyebrow">Scan to download</div><h1>{doc.title}</h1><div className="large-qr"><QrPattern value={getDocumentUrl(doc.url)} size={320} /></div><p>Point your camera at the code to open this document.</p><span className="url-chip">{doc.url}</span></div></div> }
+function FullscreenQr({ doc, onClose }: { doc: typeof documents[number]; onClose: () => void }) { return <div className="fullscreen-qr"><button className="back-link" onClick={onClose}><ArrowLeft size={17} /> QR Code</button><div className="fullscreen-content"><div className="eyebrow">Scan to download</div><h1>{doc.title}</h1><div className="large-qr"><QrPattern value={getDocumentUrl(doc.url, true)} size={320} /></div><p>Point your camera at the code to open this document.</p><span className="url-chip">{doc.url}</span></div></div> }
 
 function Viewer({ doc, onBack, onHome, onQr }: { doc: typeof documents[number]; onBack: () => void; onHome: () => void; onQr: () => void }) {
   const [zoom, setZoom] = useState(100)
