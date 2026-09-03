@@ -1,11 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import dynamic from 'next/dynamic'
 import QRCode from 'qrcode'
-import { Document, Page as PdfPage, pdfjs } from 'react-pdf'
-import 'react-pdf/dist/Page/AnnotationLayer.css'
-import 'react-pdf/dist/Page/TextLayer.css'
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+
+const PdfDocumentPreview = dynamic(() => import('@/components/pdf-document-preview').then((module) => module.PdfDocumentPreview), { ssr: false, loading: () => <div className="pdf-loading">Loading document…</div> })
 
 import {
   ArrowLeft,
@@ -55,7 +54,7 @@ function DocumentList({ onBack, onSelect }: { onBack: () => void; onSelect: (id:
 }
 
 function FakePage({ zoom, doc, pageNumber, onLoad }: { zoom: number; doc: typeof documents[number]; pageNumber: number; onLoad: (count: number) => void }) {
-  return <div className="pdf-page image-pdf-page" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center', marginBottom: `${(zoom - 100) * 5}px` }}><Document file={doc.url} onLoadSuccess={({ numPages }) => onLoad(numPages)} loading={<div className="pdf-loading">Loading document…</div>} error={<div className="pdf-error"><FileText size={30} /><strong>PDF preview unavailable</strong><a href={doc.url} target="_blank" rel="noreferrer">Open PDF in a new tab</a></div>}><PdfPage pageNumber={pageNumber} width={760} renderAnnotationLayer renderTextLayer /></Document></div>
+  return <div className="pdf-page image-pdf-page" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center', marginBottom: `${(zoom - 100) * 5}px` }}><PdfDocumentPreview url={doc.url} title={doc.title} pageNumber={pageNumber} onLoad={onLoad} /></div>
 }
 
 function QrPattern({ value, size = 220 }: { value: string; size?: number }) {
